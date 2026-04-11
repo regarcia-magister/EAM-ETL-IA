@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Guía de estudiantes - Smart Claims con metadata</title>
+  <title>Guía de estudiantes - Smart Claims con metadata v2</title>
   <style>
     body { font-family: Arial, Helvetica, sans-serif; line-height: 1.6; margin: 0; padding: 0; background: #f7f7f9; color: #222; }
     .container { max-width: 980px; margin: 0 auto; background: #fff; padding: 40px; }
@@ -26,11 +26,11 @@
 <body>
   <div class="container">
     <h1>Guía de estudiantes: Smart Claims en Databricks</h1>
-    <p><strong>Objetivo de la guía:</strong> esta guía muestra el ejercicio completo. Ustedes deben desarrollar de forma autónoma el trabajo hasta el <strong>punto 8</strong>. Los <strong>puntos 9 y 10</strong> serán desarrollados y guiados por el profesor.</p>
+    <p><strong>Objetivo de la guía:</strong> esta guía muestra el ejercicio completo. Ustedes deben desarrollar de forma autónoma el trabajo hasta el <strong>punto 8</strong>. Los <strong>puntos 9 y 10</strong> serán desarrollados y guiados por el profesor, pero aquí se explica claramente qué sucede en esas fases para que tengan la visión completa del proyecto.</p>
 
     <div class="box">
       <h3>Propósito general del ejercicio</h3>
-      <p>Construir un pipeline de datos en Databricks para un caso de reclamos de seguros. El flujo parte de archivos cargados a un volumen, continúa con la construcción de las capas Bronze, Silver y Gold, y termina con una fase guiada por el profesor donde se integra machine learning, metadata de imágenes, reglas de negocio y consumo final.</p>
+      <p>Construir un pipeline de datos en Databricks para un caso de reclamos de seguros. El flujo parte de archivos cargados a un volumen, continúa con la construcción de las capas Bronze, Silver y Gold, y termina con una fase guiada por el profesor donde se integra machine learning, metadata de imágenes, reglas de negocio y consumo final en BI.</p>
     </div>
 
     <h2>1. Visión general del ejercicio</h2>
@@ -50,20 +50,19 @@
         </tr>
         <tr>
           <td>Punto 9</td>
-          <td>Machine Learning en Databricks: preparación, entrenamiento, registro del modelo y unión con metadata de imágenes</td>
+          <td>Machine Learning en Databricks: preparación, creación del experimento en MLflow, entrenamiento, registro del modelo y unión con metadata de imágenes</td>
           <td>Profesor</td>
         </tr>
         <tr>
           <td>Punto 10</td>
-          <td>Reglas de negocio, tabla final y consumo en BI</td>
+          <td>Reglas de negocio, tabla final y construcción del BI</td>
           <td>Profesor</td>
         </tr>
       </tbody>
     </table>
 
     <div class="important">
-      <strong>Importante:</strong> ustedes sí deben entender la lógica general de los puntos 9 y 10, pero no tienen que implementarlos solos en esta práctica. Esa parte se hará en clase con guía del profesor.
-    </div>
+      <strong>Importante:</strong> ustedes sí deben entender la lógica general de los puntos 9 y 10, pero no tienen que implementarlos solos en esta práctica. Esa parte se hará en clase con guía del profesor.</div>
 
     <h2>2. Archivos con los que van a trabajar</h2>
     <p>Los archivos de entrada del ejercicio son los siguientes:</p>
@@ -94,14 +93,12 @@
         <li>Crear los esquemas <strong>landing</strong>, <strong>bronze</strong>, <strong>silver</strong> y <strong>gold</strong>.</li>
         <li>Crear un volumen dentro del esquema <strong>landing</strong>.</li>
       </ol>
-
       <h3>Qué deben comprender</h3>
       <ul>
         <li>El catálogo es el contenedor principal.</li>
         <li>Los esquemas organizan las capas del pipeline.</li>
         <li>El volumen sirve para guardar archivos de entrada.</li>
       </ul>
-
       <h3>Resultado esperado</h3>
       <p>Deben dejar listo un entorno de trabajo con un volumen donde puedan cargar todos los archivos de la práctica.</p>
     </div>
@@ -114,7 +111,6 @@
         <li>Crear dentro del volumen una estructura de carpetas clara.</li>
         <li>Subir cada archivo o carpeta al lugar correcto.</li>
       </ol>
-
       <h3>Estructura recomendada</h3>
       <ul>
         <li>customers</li>
@@ -125,7 +121,6 @@
         <li>claim_images</li>
         <li>claim_images_metadata</li>
       </ul>
-
       <h3>Qué deben verificar</h3>
       <ul>
         <li>Que el archivo de customers esté dentro de la carpeta de customers.</li>
@@ -136,7 +131,6 @@
         <li>Que la carpeta claim_images tenga contenido.</li>
         <li>Que el archivo de metadata de imágenes esté dentro de la carpeta correspondiente.</li>
       </ul>
-
       <h3>Resultado esperado</h3>
       <p>Todo el material de entrada debe quedar dentro del volumen y listo para ser leído desde Databricks.</p>
     </div>
@@ -145,7 +139,6 @@
     <div class="step">
       <h3>Qué deben hacer</h3>
       <p>Leer cada uno de los archivos o carpetas del volumen y guardarlos como tablas Delta en el esquema Bronze.</p>
-
       <h3>Tablas que deben crear</h3>
       <ul>
         <li><strong>bronze.customers</strong></li>
@@ -156,7 +149,6 @@
         <li><strong>bronze.claim_images</strong></li>
         <li><strong>bronze.claim_images_metadata</strong></li>
       </ul>
-
       <h3>Qué deben comprender</h3>
       <ul>
         <li>Los CSV se leen como archivos tabulares.</li>
@@ -165,7 +157,6 @@
         <li>La metadata de imágenes se carga como una tabla adicional.</li>
         <li>Bronze no corrige ni transforma; solo aterriza el dato.</li>
       </ul>
-
       <h3>Verificación</h3>
       <ul>
         <li>Revisar que las tablas del esquema Bronze existan.</li>
@@ -186,7 +177,6 @@
         <li>En <strong>claim_images</strong>, la ruta del archivo y su contenido binario.</li>
         <li>En <strong>claim_images_metadata</strong>, la relación entre la imagen y el reclamo.</li>
       </ul>
-
       <h3>Qué deben concluir</h3>
       <p>La capa Bronze conserva el dato casi como llega. Todavía puede haber inconsistencias de formato, nombres o tipos de dato, pero ya está listo para limpieza.</p>
     </div>
@@ -195,9 +185,7 @@
     <div class="step">
       <h3>Objetivo</h3>
       <p>Limpiar y normalizar la información para dejarla lista para integración y análisis.</p>
-
       <h3>Transformaciones que deben hacer</h3>
-
       <h4>Customers</h4>
       <ul>
         <li>Convertir la fecha de nacimiento al tipo de fecha correcto.</li>
@@ -205,41 +193,34 @@
         <li>Separar nombre y apellido.</li>
         <li>Construir un campo de dirección a partir de borough y zip code.</li>
       </ul>
-
       <h4>Policies</h4>
       <ul>
         <li>Normalizar el valor de premium.</li>
         <li>Revisar que los campos clave de la póliza estén correctos.</li>
       </ul>
-
       <h4>Claims</h4>
       <ul>
         <li>Convertir claim_date, incident_date y license_issue_date.</li>
         <li>Verificar los campos asociados al reclamo.</li>
       </ul>
-
       <h4>Telematics</h4>
       <ul>
         <li>Convertir el timestamp del evento.</li>
         <li>Filtrar coordenadas inválidas.</li>
       </ul>
-
       <h4>Training images</h4>
       <ul>
         <li>Extraer la etiqueta a partir del nombre del archivo.</li>
       </ul>
-
       <h4>Claim images</h4>
       <ul>
         <li>Extraer el nombre de la imagen desde la ruta.</li>
         <li>No inferir el reclamo desde el nombre de la imagen.</li>
       </ul>
-
       <h4>Claim images metadata</h4>
       <ul>
         <li>Limpiar y conservar las columnas necesarias para unir imágenes con reclamos.</li>
       </ul>
-
       <h3>Tablas que deben crear</h3>
       <ul>
         <li><strong>silver.customers_clean</strong></li>
@@ -264,7 +245,6 @@
         <li>Que las imágenes de reclamos ya tengan su image_name.</li>
         <li>Que la metadata de imágenes ya esté limpia y lista para unir.</li>
       </ul>
-
       <h3>Resultado esperado</h3>
       <p>Silver debe quedar lista para hacer integraciones sin problemas de formato y con la información necesaria para usar las imágenes después.</p>
     </div>
@@ -273,15 +253,12 @@
     <div class="step">
       <h3>Objetivo</h3>
       <p>Crear tablas integradas y útiles para análisis de negocio.</p>
-
       <h3>Paso A: agregar telemática por vehículo</h3>
       <p>Deben agrupar la tabla de telemática por <strong>chassis_no</strong> y obtener indicadores promedio, especialmente de velocidad y coordenadas.</p>
       <p><strong>Tabla esperada:</strong> <strong>gold.aggregated_telematics</strong></p>
-
       <h3>Paso B: unir reclamos, pólizas y clientes</h3>
       <p>Deben consolidar la información del reclamo con la póliza asociada y los datos del cliente.</p>
       <p><strong>Tabla esperada:</strong> <strong>gold.customer_claim_policy</strong></p>
-
       <h3>Paso C: unir la tabla anterior con la telemática agregada</h3>
       <p>Deben enriquecer la tabla integrada con la información de telemática del vehículo.</p>
       <p><strong>Tabla esperada:</strong> <strong>gold.customer_claim_policy_telematics</strong></p>
@@ -297,7 +274,6 @@
         <li>Que la información de telemática se haya unido correctamente por vehículo.</li>
         <li>Que la tabla tenga sentido para análisis de negocio.</li>
       </ul>
-
       <h3>Qué deben observar</h3>
       <p>La tabla Gold ya debe permitir responder preguntas como:</p>
       <ul>
@@ -305,42 +281,201 @@
         <li>¿Qué póliza cubre ese reclamo?</li>
         <li>¿Cuál fue el comportamiento telemático promedio del vehículo?</li>
       </ul>
-
       <h3>Resultado esperado</h3>
       <p>Al terminar este punto, ustedes ya deben tener la base principal del caso lista para la siguiente fase, que será guiada por el profesor.</p>
     </div>
 
     <div class="important">
-      <strong>Hasta aquí llega el trabajo autónomo del estudiante.</strong> Desde este punto, la implementación será guiada por el profesor.
-    </div>
+      <strong>Hasta aquí llega el trabajo autónomo del estudiante.</strong> Desde este punto, la implementación será guiada por el profesor.</div>
 
     <h2>11. Punto 9: machine learning en Databricks</h2>
     <div class="teacher">
       <h3>Esta parte será desarrollada por el profesor</h3>
-      <p>En esta fase se utilizarán las imágenes de entrenamiento para construir un modelo de clasificación de daño vehicular dentro de Databricks.</p>
+      <p>En esta fase se utilizarán las imágenes de entrenamiento para construir un modelo de clasificación de daño vehicular dentro de Databricks. Aunque esta parte no la harán solos, sí deben entender claramente el orden de trabajo y qué debe contener el notebook.</p>
+
+      <h3>Objetivo del punto 9</h3>
+      <p>Entrenar un modelo de clasificación de imágenes, registrar correctamente el proceso en MLflow, publicar el modelo y luego usarlo para generar predicciones sobre imágenes reales de reclamos.</p>
+
+      <h3>Cómo debe hacerse paso a paso</h3>
+
+      <h4>Paso 1. Verificar que la tabla de imágenes de entrenamiento esté lista</h4>
+      <p>Antes de cualquier entrenamiento, se debe revisar que la tabla de <strong>training_images</strong> ya exista en Silver y que cada imagen tenga su <strong>label</strong>. En este punto no se debe empezar a entrenar si todavía hay problemas con nombres de archivos, labels vacíos o imágenes mal cargadas.</p>
+      <p><strong>Qué debe traer el notebook en este bloque:</strong> una validación inicial donde se revise que las imágenes existen, que la columna binaria de contenido existe y que la columna de label está bien construida.</p>
+
+      <h4>Paso 2. Instalar e importar las librerías necesarias</h4>
+      <p>Luego se prepara el entorno de trabajo para machine learning. Aquí se cargan las librerías necesarias para manipular imágenes, construir el dataset, entrenar con Transformers y registrar el modelo.</p>
+      <p><strong>Qué debe traer el notebook en este bloque:</strong> instalación de librerías y luego imports de procesamiento de imágenes, datasets, Transformers, torch y MLflow.</p>
+
+      <h4>Paso 3. Abrir o crear un experimento en MLflow</h4>
+      <p>Este paso es muy importante. Antes de entrenar, se debe definir un <strong>experimento en MLflow</strong>. Ese experimento es el lugar donde quedarán guardadas las corridas del modelo.</p>
+      <p>En términos simples:</p>
       <ul>
-        <li>Preparar y redimensionar imágenes de entrenamiento.</li>
-        <li>Construir un dataset de entrenamiento y validación.</li>
-        <li>Entrenar un modelo de clasificación de imágenes.</li>
-        <li>Registrar el modelo en MLflow y en Unity Catalog.</li>
-        <li>Aplicar el modelo a las imágenes reales de reclamos.</li>
-        <li>Unir la predicción con la metadata de imágenes para recuperar <strong>claim_no</strong>.</li>
+        <li>El <strong>experimento</strong> organiza el trabajo.</li>
+        <li>Dentro del experimento se crean una o varias <strong>corridas</strong>.</li>
+        <li>Cada corrida guarda parámetros, métricas, artefactos y modelos.</li>
       </ul>
-      <p><strong>Resultado esperado:</strong> una tabla de predicciones sobre imágenes reales, ya conectada con la metadata del reclamo.</p>
+      <p>El profesor debe mostrar cómo se define el experimento para que el entrenamiento no quede disperso.</p>
+      <p><strong>Qué debe traer el notebook en este bloque:</strong></p>
+      <ul>
+        <li>una instrucción para fijar el experimento,</li>
+        <li>un nombre claro para ese experimento,</li>
+        <li>la explicación de que todas las corridas del entrenamiento quedarán guardadas ahí.</li>
+      </ul>
+
+      <h4>Paso 4. Preparar las imágenes para el entrenamiento</h4>
+      <p>Las imágenes deben quedar en un tamaño uniforme antes de entrar al modelo. En este paso se toman las imágenes de entrenamiento y se redimensionan.</p>
+      <p><strong>Qué debe traer el notebook en este bloque:</strong> una función o procedimiento para redimensionar imágenes, aplicar esa transformación sobre la tabla de entrenamiento y guardar una nueva tabla intermedia lista para usar.</p>
+      <p><strong>Qué deben entender:</strong> este paso no cambia el significado de la imagen, solo la adapta al tamaño que el modelo necesita.</p>
+
+      <h4>Paso 5. Construir el dataset de entrenamiento y validación</h4>
+      <p>Después de redimensionar, se toma la tabla lista y se construye el dataset que realmente usará el modelo. Ese dataset debe dividirse en dos partes:</p>
+      <ul>
+        <li><strong>entrenamiento</strong>, para que el modelo aprenda,</li>
+        <li><strong>validación</strong>, para revisar cómo se comporta con datos que no usó para aprender.</li>
+      </ul>
+      <p><strong>Qué debe traer el notebook en este bloque:</strong></p>
+      <ul>
+        <li>conversión desde la tabla hacia un formato compatible con entrenamiento,</li>
+        <li>separación entre entrenamiento y validación,</li>
+        <li>creación del diccionario de clases, es decir, la relación entre cada label y su identificador numérico.</li>
+      </ul>
+
+      <h4>Paso 6. Convertir el binario a imagen</h4>
+      <p>En este punto las imágenes siguen siendo contenido binario. El notebook debe incluir un paso donde ese contenido se convierta a imágenes reales que puedan ser leídas por el procesador del modelo.</p>
+      <p><strong>Qué debe traer el notebook en este bloque:</strong> una transformación que convierta el contenido binario en imágenes interpretables por el pipeline de visión.</p>
+
+      <h4>Paso 7. Seleccionar el modelo base</h4>
+      <p>Aquí no se entrena un modelo desde cero. Se usa un modelo base ya preentrenado y luego se ajusta al problema específico del ejercicio.</p>
+      <p><strong>Qué debe traer el notebook en este bloque:</strong></p>
+      <ul>
+        <li>definición del checkpoint o modelo base,</li>
+        <li>carga del procesador asociado,</li>
+        <li>carga del modelo de clasificación con el número correcto de clases.</li>
+      </ul>
+      <p><strong>Qué deben entender:</strong> el modelo base ya sabe reconocer patrones visuales generales, y aquí solo se adapta al caso de daños del vehículo.</p>
+
+      <h4>Paso 8. Preprocesar las imágenes para el modelo</h4>
+      <p>Antes del entrenamiento, cada imagen debe convertirse a la representación numérica que el modelo espera. Esto normalmente lo hace el procesador del modelo.</p>
+      <p><strong>Qué debe traer el notebook en este bloque:</strong> una función de preprocesamiento que transforme la imagen en tensores o valores numéricos listos para el entrenamiento.</p>
+
+      <h4>Paso 9. Configurar los parámetros de entrenamiento</h4>
+      <p>Aquí se define cómo se entrenará el modelo. Se decide, por ejemplo:</p>
+      <ul>
+        <li>cuántas épocas se usarán,</li>
+        <li>cuál será el tamaño de batch,</li>
+        <li>qué tasa de aprendizaje se usará,</li>
+        <li>cómo se evaluará el mejor modelo.</li>
+      </ul>
+      <p><strong>Qué debe traer el notebook en este bloque:</strong> la configuración de entrenamiento y la función que agrupa correctamente los datos en cada batch.</p>
+
+      <h4>Paso 10. Abrir una corrida en MLflow y entrenar</h4>
+      <p>Cuando todo está listo, se debe abrir una <strong>corrida en MLflow</strong>. Esa corrida es el registro específico del entrenamiento que se va a ejecutar.</p>
+      <p>Dentro de esa corrida el código debe registrar:</p>
+      <ul>
+        <li>parámetros importantes del entrenamiento,</li>
+        <li>el modelo base utilizado,</li>
+        <li>el tamaño de imagen,</li>
+        <li>la cantidad de épocas,</li>
+        <li>y cualquier otro valor importante del experimento.</li>
+      </ul>
+      <p>Después de abrir la corrida, se ejecuta el entrenamiento.</p>
+      <p><strong>Qué debe traer el notebook en este bloque:</strong> una corrida de MLflow alrededor del entrenamiento, con registro de parámetros y ejecución del entrenador.</p>
+
+      <h4>Paso 11. Construir el pipeline de inferencia</h4>
+      <p>Una vez entrenado el modelo, se crea un pipeline de inferencia. Ese pipeline es el que permitirá tomar una imagen nueva y devolver una predicción.</p>
+      <p><strong>Qué debe traer el notebook en este bloque:</strong> la creación de un objeto de inferencia listo para clasificar imágenes nuevas.</p>
+
+      <h4>Paso 12. Envolver el modelo para poder registrarlo</h4>
+      <p>El modelo entrenado debe quedar preparado para ser registrado formalmente. Para eso se envuelve en una estructura compatible con MLflow.</p>
+      <p><strong>Qué debe traer el notebook en este bloque:</strong> una clase o wrapper que reciba imágenes de entrada y devuelva la predicción con su score.</p>
+
+      <h4>Paso 13. Definir una muestra de entrada y la firma del modelo</h4>
+      <p>Antes de registrar el modelo, se debe usar una muestra real de entrada para inferir la firma del modelo. Eso ayuda a dejar claro qué espera como entrada y qué devuelve como salida.</p>
+      <p><strong>Qué debe traer el notebook en este bloque:</strong> una pequeña muestra de imágenes y la definición de la firma del modelo.</p>
+
+      <h4>Paso 14. Registrar el modelo en MLflow</h4>
+      <p>Después de entrenar, el modelo debe quedar guardado como artefacto dentro de MLflow.</p>
+      <p><strong>Qué debe traer el notebook en este bloque:</strong> una nueva corrida o un registro del modelo como artefacto de MLflow, incluyendo su firma y dependencias necesarias.</p>
+      <p><strong>Qué deben entender:</strong> una cosa es el entrenamiento y otra cosa es el registro final del modelo. Ambos deben quedar trazados.</p>
+
+      <h4>Paso 15. Publicar el modelo en Unity Catalog</h4>
+      <p>Luego el modelo debe registrarse dentro de Unity Catalog para que quede disponible como activo gobernado dentro del workspace.</p>
+      <p><strong>Qué debe traer el notebook en este bloque:</strong></p>
+      <ul>
+        <li>la referencia al modelo guardado en MLflow,</li>
+        <li>el registro del modelo en Unity Catalog,</li>
+        <li>la asignación de un alias, normalmente <strong>prod</strong>.</li>
+      </ul>
+      <p><strong>Qué deben entender:</strong> el alias permite usar el modelo sin depender del número de versión explícito.</p>
+
+      <h4>Paso 16. Crear la función de predicción en Spark</h4>
+      <p>Después de registrar el modelo, se crea una función que permita usarlo dentro del flujo de Spark para predecir imágenes desde una tabla.</p>
+      <p><strong>Qué debe traer el notebook en este bloque:</strong> una función de predicción que tome la columna de contenido binario y devuelva la estructura de salida del modelo.</p>
+
+      <h4>Paso 17. Predecir sobre imágenes reales de reclamos</h4>
+      <p>Aquí se aplica el modelo a la tabla de <strong>claim_images</strong>. En este momento todavía no aparece el reclamo directamente; solo aparece la predicción por imagen.</p>
+      <p><strong>Qué debe traer el notebook en este bloque:</strong> la aplicación del modelo sobre la tabla de imágenes reales y la construcción de una tabla de predicción inicial.</p>
+
+      <h4>Paso 18. Unir la predicción con la metadata de imágenes</h4>
+      <p>Este es uno de los pasos más importantes. La salida del modelo debe unirse con la <strong>metadata de imágenes</strong> para recuperar el <strong>claim_no</strong> y el <strong>chassis_no</strong>.</p>
+      <p><strong>Qué debe traer el notebook en este bloque:</strong> una unión entre la tabla de predicción por imagen y la tabla de metadata usando <strong>image_name</strong>.</p>
+      <p><strong>Qué deben entender:</strong> sin esta unión no sería posible saber a qué reclamo pertenece la predicción.</p>
+
+      <h4>Paso 19. Guardar la tabla final de predicciones</h4>
+      <p>Al terminar, debe guardarse una tabla final que ya contenga:</p>
+      <ul>
+        <li>la imagen,</li>
+        <li>la predicción del modelo,</li>
+        <li>el score,</li>
+        <li>el <strong>claim_no</strong>,</li>
+        <li>el <strong>chassis_no</strong>.</li>
+      </ul>
+      <p><strong>Resultado esperado:</strong> una tabla Gold con predicciones listas para entrar a la fase de reglas de negocio.</p>
     </div>
 
-    <h2>12. Punto 10: reglas de negocio y consumo final</h2>
+    <h2>12. Punto 10: reglas de negocio y construcción del BI</h2>
     <div class="teacher">
       <h3>Esta parte será desarrollada por el profesor</h3>
-      <p>En esta última fase se integrarán las predicciones del modelo con la tabla Gold y se construirán reglas para apoyar la decisión sobre cada reclamo.</p>
+      <p>En esta última fase se integrarán las predicciones del modelo con la tabla Gold y se construirán reglas para apoyar la decisión sobre cada reclamo. Luego se construirá el BI del ejercicio.</p>
+      <h3>Qué se hará en esta etapa</h3>
       <ul>
         <li>Unir la tabla Gold con las predicciones enriquecidas con metadata.</li>
         <li>Crear reglas de negocio para validar pólizas, montos y coherencia del reclamo.</li>
         <li>Construir una tabla final de insights.</li>
         <li>Realizar consultas finales para análisis.</li>
-        <li>Mostrar el consumo del caso en BI.</li>
+        <li>Construir un dashboard o conjunto de visualizaciones en BI.</li>
       </ul>
-      <p><strong>Resultado esperado:</strong> una tabla final de reclamos enriquecidos y una vista lista para consumo analítico.</p>
+      <h3>Cómo se debe construir el BI</h3>
+      <p>El BI debe quedar organizado en tres bloques para que el flujo del caso se entienda claramente.</p>
+      <h3>Bloque A. Vista de negocio</h3>
+      <ul>
+        <li>Reclamos por severidad.</li>
+        <li>Pérdida total por tipo de incidente.</li>
+        <li>Frecuencia de reclamos por hora del incidente.</li>
+      </ul>
+      <p>Este bloque muestra el caso desde la perspectiva operativa y de negocio.</p>
+      <h3>Bloque B. Vista de predicción</h3>
+      <ul>
+        <li>Distribución de la predicción del modelo.</li>
+        <li>Comparación entre severidad reportada y severidad predicha.</li>
+        <li>Coincidencia vs discrepancia entre lo reportado y lo predicho.</li>
+      </ul>
+      <p>Este bloque hace visible el aporte del modelo al caso.</p>
+      <h3>Bloque C. Vista de decisión final</h3>
+      <ul>
+        <li>Casos liberados vs investigados.</li>
+        <li>Predicción vs decisión final.</li>
+        <li>Motivos de revisión según reglas de negocio.</li>
+      </ul>
+      <p>Este bloque conecta la predicción y las reglas con la salida operativa del proceso.</p>
+      <h3>Qué deben entender como estudiantes</h3>
+      <ul>
+        <li>El BI no solo muestra métricas generales.</li>
+        <li>Debe mostrar el recorrido completo: dato → predicción → regla → decisión.</li>
+        <li>La salida final del proyecto debe ser comprensible para un usuario de negocio.</li>
+      </ul>
+      <h3>Resultado esperado</h3>
+      <p>Una tabla final de reclamos enriquecidos y un conjunto de visualizaciones que permitan interpretar el comportamiento del caso desde negocio, predicción y decisión final.</p>
     </div>
 
     <h2>13. Entregables esperados del estudiante</h2>
@@ -352,6 +487,7 @@
         <li>Tablas Silver creadas y verificadas.</li>
         <li>Metadata de imágenes cargada y limpiada.</li>
         <li>Tablas Gold creadas y verificadas hasta <strong>customer_claim_policy_telematics</strong>.</li>
+        <li>BI final debe mostrar negocio, predicción y decisión.</li>
       </ul>
     </div>
 
@@ -368,10 +504,12 @@
       <li>Creé la tabla final Gold enriquecida con telemática.</li>
       <li>Validé que la tabla final tiene sentido para análisis.</li>
       <li>Comprendí que la metadata será necesaria para conectar la predicción con el reclamo.</li>
+      <li>Comprendí que el experimento en MLflow organiza las corridas de entrenamiento.</li>
+      <li>Comprendí que el BI final debe mostrar negocio, predicción y decisión.</li>
     </ul>
 
     <div class="important">
-      <strong>Resumen final:</strong> el estudiante desarrolla hasta el punto 8. Los puntos 9 y 10 hacen parte del ejercicio completo, pero serán orientados por el profesor durante la clase. La metadata de imágenes forma parte esencial del flujo real del caso.</div>
+      <strong>Resumen final:</strong> el estudiante desarrolla hasta el punto 8. Los puntos 9 y 10 hacen parte del ejercicio completo, pero serán orientados por el profesor durante la clase. La metadata de imágenes y el experimento en MLflow forman parte esencial del flujo real del caso.</div>
 
     <p class="muted">Fin de la guía de estudiantes.</p>
   </div>
