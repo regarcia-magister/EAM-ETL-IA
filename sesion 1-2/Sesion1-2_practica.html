@@ -1,0 +1,241 @@
+<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="author" content="Robert García Rey"><title>Sesiones 1 y 2 · Práctica en Databricks</title><style>
+*{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:85px}body{margin:0;background:#f1f6fa;color:#12233b;font:18px/1.65 Aptos,'Segoe UI',Arial,sans-serif}nav{position:sticky;top:0;background:#004f61;color:white;padding:13px 24px;display:flex;justify-content:center;gap:25px;z-index:2;flex-wrap:wrap}nav a{color:white;font-weight:650;text-decoration:none}main{max-width:1100px;margin:32px auto 60px;background:white;padding:25px 55px 55px}.cell{margin:0;padding:20px 0;border-bottom:1px solid #e0e9ef}h1{font-size:34px;line-height:1.2;color:#00568e;margin:8px 0 22px}h2{font-size:26px;line-height:1.3;color:#00568e;margin:4px 0 15px}p{margin:0 0 14px}li{margin-bottom:9px}a{color:#006caf;text-underline-offset:3px}a:focus-visible{outline:3px solid #28b8ce;outline-offset:3px}table{width:100%;border-collapse:collapse;margin:15px 0;font-size:17px}th,td{padding:10px;border-bottom:1px solid #d9e6ed;text-align:left;vertical-align:top}th{color:#00568e}pre{background:#edf3f8;margin:6px 0;padding:22px;overflow-x:auto;line-height:1.5;border-left:4px solid #28b8ce;font-size:16px}code{font-family:Consolas,'Cascadia Mono',monospace}.cell-label{font-size:13px;font-weight:700;color:#526479;letter-spacing:.06em}.return-cell{background:#fff3e8;border-left:5px solid #c75c10;padding:26px;margin:25px 0}.return-cell h2{color:#93450d}.local-return a{font-weight:700}.local-return small{display:block;font-size:15px;color:#526479;margin-top:8px}.download{padding:16px 0;font-size:16px}.download a{font-weight:700}@media(max-width:700px){main{padding:18px;margin:12px}nav{gap:13px;padding:10px}body{font-size:17px}h1{font-size:28px}table{font-size:14px}pre{font-size:14px;padding:12px}.return-cell{padding:16px}}@media print{nav,.download{display:none}main{margin:0;padding:0;max-width:none}pre{white-space:pre-wrap;overflow-wrap:anywhere}.cell{break-inside:avoid}body{background:white}}
+
+/* Reading the same class code on individual screens. */
+pre{font-size:18px;line-height:1.55}
+.cell-label{font-size:14px}
+h3{font-size:25px;line-height:1.3;color:#00568e;margin:4px 0 15px}
+nav{gap:14px 24px;font-size:16px}
+td,th{overflow-wrap:anywhere}
+@media(max-width:700px){html{scroll-padding-top:140px}pre{font-size:16px}h3{font-size:23px}nav{gap:8px 15px;font-size:15px}}
+</style></head><body><nav aria-label="Temas de la práctica"><a href="#entorno">Entorno</a><a href="#archivos-tablas">Archivos y tablas</a><a href="#spark-delta">Spark y Delta</a><a href="#vistas-permisos">Vistas y permisos</a><a href="https://www.databricks.com/" target="_blank" rel="noopener">Databricks</a></nav><main><section class="cell intro"><h1>Sesiones 1 y 2 · Práctica en Databricks</h1>
+<p>Arquitecturas ETL y Modelos de IA Aplicados · EAM · 2026-II<br>Robert García Rey</p>
+<p>En esta práctica crearemos un notebook desde cero para conocer el entorno de Databricks, cargar archivos y trabajar con SQL y PySpark. Consultaremos tablas, aplicaremos operaciones Delta y crearemos una vista y una función.</p>
+<p>Durante la clase, agrega las celdas en el orden indicado. Cada recuadro contiene el código de una celda y señala su lenguaje. Ejecuta cada paso y revisa el resultado antes de continuar. Puedes ampliar el texto con <strong>Ctrl + +</strong> y recuperar el tamaño original con <strong>Ctrl + 0</strong>.</p>
+<h2>Material de trabajo</h2><ol><li>Mantener este archivo abierto para consultar el código mientras avanzamos.</li><li>Descargar los cinco CSV desde el <a href="https://github.com/regarcia-magister/EAM-ETL-IA/tree/main/sesion%201-2/data" target="_blank" rel="noopener">repositorio de la sesión 1–2</a>. Abrir cada archivo, usar <strong>Download raw file</strong> y conservar su nombre y extensión .csv. Si tienes el paquete completo, los encontrarás en Presentacion_RevealJS/datos.</li><li>Abrir <a href="https://www.databricks.com/" target="_blank" rel="noopener">Databricks</a>, iniciar sesión y acceder al workspace de clase.</li></ol><h2>Archivos y propósito</h2><div class="column"><table><thead><tr><th scope="col">Archivo</th><th scope="col">Filas</th><th scope="col">Uso</th></tr></thead><tbody><tr><td>data_demo.csv</td><td>8.969</td><td>Lectura y tabla de inmuebles.</td></tr><tr><td>nutrients_csvfile.csv</td><td>335</td><td>Lectura como texto y revisión de tipos.</td></tr><tr><td>ventas_2025.csv</td><td>100</td><td>Tabla Delta, operaciones e historial, vista y función.</td></tr><tr><td>spark_intro.csv</td><td>10</td><td>Transformaciones de pedidos con Spark.</td></tr><tr><td>dim_spark_intro.csv</td><td>4</td><td>Dimensión para una unión por producto.</td></tr></tbody></table></div>
+<h2>Objetos de clase</h2><p>Usaremos un catálogo general llamado <strong>analitica</strong>, el esquema <strong>data</strong> y el volumen <strong>landing</strong>. La ruta de los archivos será <strong>/Volumes/analitica/data/landing</strong>. Cada ejemplo tendrá nombres propios de tabla.</p></section>
+<section id="entorno" class="cell explanation"><h2>1 · Acceso y entorno</h2><p>Crearemos un notebook desde cero. Después seleccionaremos su cómputo y escribiremos las primeras celdas.</p>
+<h3>1.1 · Creación del notebook</h3><ol><li>En la barra lateral de Databricks, hacer clic en <strong>Workspace</strong> y abrir la carpeta personal o la carpeta asignada para la clase.</li><li>Hacer clic derecho sobre esa carpeta y elegir <strong>Create</strong> y después <strong>Notebook</strong>. Se abre un notebook vacío.</li><li>Hacer clic sobre su título en la parte superior y escribir <strong>01_Fundamentos_Databricks</strong>. Confirmar el nuevo nombre.</li><li>Junto al título, revisar el lenguaje predeterminado y seleccionar <strong>Python</strong>.</li><li>Comprobar que el notebook está abierto e identificar su título, el lenguaje y el selector de cómputo.</li></ol><p>También podemos crear un notebook desde <strong>+ New</strong> y <strong>Notebook</strong> en la barra lateral, y después asignarle el mismo nombre.</p>
+<p><a href="https://docs.databricks.com/aws/en/notebooks/notebooks-manage" target="_blank" rel="noopener">Consulta: creación de notebooks</a></p></section>
+<section class="cell explanation"><h3>1.2 · Selección de Serverless</h3><p>El cómputo es el recurso que ejecuta las celdas. Si la cuenta ofrece Serverless, lo utilizaremos en esta práctica.</p><ol><li>Con el notebook abierto, localizar el <strong>selector de cómputo en su barra superior</strong>. El texto puede mostrar la conexión pendiente, Serverless o el nombre del recurso actual.</li><li>Hacer clic en ese selector para abrir la lista.</li><li>Seleccionar <strong>Serverless</strong>, si aparece. Si ya figura como recurso activo, conservar esa selección.</li><li>Ejecutar la celda de prueba del apartado 1.4. La primera ejecución puede tardar mientras Databricks prepara la sesión.</li><li>Esperar a que termine y revisar que aparezca la tabla con una fila.</li></ol><p>En un workspace con Serverless disponible no hace falta crear un clúster manual para seguir esta práctica.</p><p><a href="https://docs.databricks.com/aws/en/compute/serverless/notebooks" target="_blank" rel="noopener">Consulta: conexión del notebook a Serverless</a></p></section>
+<section class="cell explanation"><h3>1.3 · Si Serverless no aparece</h3><ol><li>Abrir el mismo selector de cómputo.</li><li>Buscar el recurso interactivo de clase. Si no figura en la lista corta, elegir <strong>More...</strong> y revisar los recursos de uso general disponibles.</li><li>Seleccionar el recurso indicado para la clase y confirmar con <strong>Attach</strong> si el diálogo muestra ese botón.</li><li>Si está detenido, iniciarlo desde su ficha en <strong>Compute</strong> con <strong>Start</strong>, o aceptar el inicio que solicite el notebook. Esperar a que esté en ejecución y regresar al notebook.</li></ol><p>Este notebook utiliza SQL y PySpark. Un <strong>SQL warehouse</strong> ejecuta las celdas SQL, pero no las de Python. Para completar la sesión elegimos Serverless para notebooks o cómputo interactivo compatible con Unity Catalog. Para conectarnos a un recurso clásico necesitamos el permiso CAN ATTACH TO.</p><p><a href="https://docs.databricks.com/aws/en/notebooks/notebook-compute" target="_blank" rel="noopener">Consulta: recursos de cómputo del notebook</a></p></section>
+<section class="cell explanation"><h3>Creación de cómputo clásico, cuando la cuenta lo permita</h3><p>Este paso solo aplica si no tenemos Serverless ni un recurso de clase disponible.</p><ol><li>En la barra lateral, abrir <strong>Compute</strong> y pulsar <strong>Create compute</strong>.</li><li>Escribir <strong>analitica_compute</strong> como nombre.</li><li>Seleccionar la política de cómputo permitida por el workspace. Algunas opciones pueden estar fijadas por esa política.</li><li>Elegir un Databricks Runtime LTS disponible, versión 13.3 o posterior para trabajar con volúmenes.</li><li>En la configuración de acceso, utilizar un modo compatible con Unity Catalog, como Standard, según la política de clase.</li><li>Mantener el tamaño de recurso autorizado para la clase y pulsar <strong>Create</strong>. Esperar a que el recurso esté en ejecución.</li><li>Volver al notebook, abrir su selector, localizar analitica_compute y conectarlo.</li></ol><p>Si faltan Create compute o los permisos de conexión, el administrador debe habilitar el recurso de clase. La creación manual de cómputo puede no estar disponible en todas las ediciones.</p><p><a href="https://docs.databricks.com/aws/en/compute/configure" target="_blank" rel="noopener">Consulta: creación de cómputo clásico</a> · <a href="https://docs.databricks.com/aws/en/volumes/" target="_blank" rel="noopener">Requisitos de los volúmenes</a></p></section>
+<section class="cell explanation"><h3>1.4 · Creación y ejecución de la primera celda</h3><ol><li>Usar la primera celda vacía del notebook. Para agregar otra, situar el cursor debajo de una celda y pulsar <strong>+ Code</strong>.</li><li>En el selector de lenguaje de la celda, elegir <strong>Python</strong>.</li><li>Escribir la instrucción del recuadro siguiente en esa celda.</li><li>Ejecutarla con el botón de triángulo de la celda o con <strong>Shift + Enter</strong>.</li><li>Esperar la salida y comprobar que aparece la columna id con el valor 0.</li></ol><p><strong>Para continuar:</strong> cada recuadro de código de este HTML corresponde a una nueva celda en Databricks. Elegimos el lenguaje indicado, escribimos ese código, lo ejecutamos y revisamos el resultado antes de agregar la siguiente celda. Para SQL seleccionamos SQL en la celda o escribimos %sql en su primera línea.</p><p>Podemos separar los bloques con <strong>+ Text</strong> y un título, por ejemplo <strong>## Entorno de Databricks</strong>. Conservaremos el mismo notebook durante toda la práctica.</p><p><a href="https://docs.databricks.com/aws/en/notebooks/basic-editing" target="_blank" rel="noopener">Consulta: creación de celdas</a> · <a href="https://docs.databricks.com/aws/en/notebooks/run-notebook" target="_blank" rel="noopener">Ejecución de celdas</a></p></section>
+<section class="cell code-cell"><div class="cell-label">Celda 1 · Python</div><pre><code>spark.range(1).show()</code></pre></section>
+<section class="cell explanation"><p>Si aparece una solicitud de conexión, seleccionamos el recurso de los apartados anteriores. Si una celda Python informa que el lenguaje no está admitido, revisamos que no hayamos elegido un SQL warehouse.</p>
+<h3>1.5 · Identidad y ubicación actual</h3><p>Debajo de la celda anterior pulsamos + Code, seleccionamos SQL y escribimos la consulta siguiente. La ejecutamos para revisar quién utiliza el notebook y dónde busca los objetos cuando no escribimos el catálogo y esquema.</p></section>
+<section class="cell code-cell"><div class="cell-label">Celda 2 · SQL</div><pre><code>SELECT current_user() AS usuario,
+       current_catalog() AS catalogo,
+       current_schema() AS esquema</code></pre></section>
+<section class="cell explanation"><h3>1.6 · Catálogos disponibles</h3><p>Ejecutamos la siguiente celda y revisamos la columna con los nombres de catálogos. analitica puede no aparecer todavía, porque lo crearemos en el apartado 2. El catálogo samples contiene ejemplos de lectura y no será el destino de nuestras escrituras.</p></section>
+<section class="cell code-cell"><div class="cell-label">Celda 3 · SQL</div><pre><code>SHOW CATALOGS</code></pre></section>
+<section class="cell explanation"><h3>Comprobación del entorno</h3><p>Identificamos nuestra cuenta, el notebook y su cómputo. También reconocemos el catálogo donde vamos a crear el espacio de trabajo.</p></section>
+<section id="archivos-tablas" class="cell explanation"><h2>2 · Archivos y primeras tablas</h2><p>Vamos a crear un esquema y un volumen. Después cargaremos los CSV y revisaremos sus columnas.</p>
+<h3>2.1 · Creación y selección del catálogo analitica</h3><p>Ejecutamos primero la celda que crea el catálogo y después la que lo selecciona. IF NOT EXISTS permite continuar si el objeto ya existe.</p><p>Crear un catálogo requiere CREATE CATALOG en el metastore y almacenamiento administrado configurado en el entorno. Si falta el permiso o la ubicación de almacenamiento, el administrador debe preparar el catálogo analitica. Una vez creado y autorizado, continuamos con USE CATALOG analitica.</p><p><a href="https://docs.databricks.com/aws/en/catalogs/create-catalog" target="_blank" rel="noopener">Consulta: creación de catálogos y requisitos</a></p></section>
+<section class="cell code-cell"><div class="cell-label">Celda 4 · SQL</div><pre><code>CREATE CATALOG IF NOT EXISTS analitica</code></pre></section>
+<section class="cell code-cell"><div class="cell-label">Celda 5 · SQL</div><pre><code>USE CATALOG analitica</code></pre></section>
+<section class="cell explanation"><p><strong>Comprobación visual:</strong> abrir Catalog en la barra lateral, buscar analitica y abrirlo. Si no aparece, actualizar el listado o buscar por su nombre. Volver al notebook para crear el esquema.</p></section>
+<section class="cell explanation"><h3>2.2 · Creación del esquema data</h3><p>Ejecutamos la siguiente celda. El nombre completo analitica.data indica que el esquema data pertenece al catálogo analitica. La segunda instrucción lo deja como esquema activo para las consultas posteriores.</p></section>
+<section class="cell code-cell"><div class="cell-label">Celda 6 · SQL</div><pre><code>CREATE SCHEMA IF NOT EXISTS analitica.data;
+USE SCHEMA analitica.data;</code></pre></section>
+<section class="cell explanation"><p><strong>Comprobación:</strong> ejecutar SHOW SCHEMAS y buscar data en el resultado. También podemos regresar a Catalog, abrir analitica y comprobar que contiene el esquema data.</p></section>
+<section class="cell code-cell"><div class="cell-label">Celda 7 · SQL</div><pre><code>SHOW SCHEMAS IN analitica</code></pre></section>
+<section class="cell explanation"><h3>2.3 · Creación del volumen landing</h3><p>Ejecutamos la creación del volumen y después su consulta. El nombre completo analitica.data.landing identifica catálogo, esquema y volumen.</p><p>Para crear el esquema necesitamos CREATE SCHEMA en analitica. Para crear el volumen necesitamos CREATE VOLUME en analitica.data y permiso de uso de los contenedores. Si ya los creó otra persona, debe concedernos el acceso correspondiente.</p></section>
+<section class="cell code-cell"><div class="cell-label">Celda 8 · SQL</div><pre><code>CREATE VOLUME IF NOT EXISTS analitica.data.landing</code></pre></section>
+<section class="cell code-cell"><div class="cell-label">Celda 9 · SQL</div><pre><code>SHOW VOLUMES IN analitica.data</code></pre></section>
+<section class="cell explanation"><p><strong>Resultado esperado:</strong> la lista de volúmenes incluye landing. En Catalog, abrir analitica, después data y finalmente landing. Su contenido estará vacío si acabamos de crearlo.</p></section>
+<section class="cell explanation"><h3>2.4 · Carga manual de los CSV</h3><ol><li>En el notebook, abrir el menú <strong>File</strong> y seleccionar <strong>Upload files to volume</strong>.</li><li>En Files, pulsar browse y seleccionar los cinco archivos de Presentacion_RevealJS/datos: data_demo.csv, nutrients_csvfile.csv, ventas_2025.csv, spark_intro.csv y dim_spark_intro.csv.</li><li>En <strong>Destination volume</strong> escribir <strong>/Volumes/analitica/data/landing</strong>, o seleccionar analitica, data y landing.</li><li>Revisar los cinco nombres y cargar directamente en la raíz del volumen, sin subcarpetas. Pulsar <strong>Upload</strong> y esperar.</li><li>Abrir <strong>Catalog</strong>, después analitica, data y landing. Comprobar que aparecen los cinco archivos.</li><li>Volver al notebook y continuar con una nueva celda SQL.</li></ol><p>Otra entrada al asistente es Catalog, Add data y Upload files to a volume. Para subir archivos necesitamos WRITE VOLUME y permisos de uso del catálogo y esquema.</p><p><a href="https://docs.databricks.com/aws/en/volumes/volume-files" target="_blank" rel="noopener">Consulta: carga de archivos a un volumen</a></p></section>
+<section class="cell explanation"><h3>2.5 · Primera tabla creada con SQL</h3><p>Agregamos una celda SQL. Esta tabla pequeña permite distinguir la estructura de una tabla de sus registros. Indicamos USING DELTA para hacer explícito el formato. CREATE OR REPLACE reinicia únicamente esta tabla de práctica.</p></section>
+<section class="cell code-cell"><div class="cell-label">Celda 10 · SQL</div><pre><code>CREATE OR REPLACE TABLE tabla_simple (
+  id INT,
+  nombre STRING
+)
+USING DELTA</code></pre></section>
+<section class="cell code-cell"><div class="cell-label">Celda 11 · SQL</div><pre><code>INSERT INTO tabla_simple VALUES (1, &#x27;Ana&#x27;), (2, &#x27;Luis&#x27;), (3, &#x27;María&#x27;)</code></pre></section>
+<section class="cell code-cell"><div class="cell-label">Celda 12 · SQL</div><pre><code>SELECT * FROM tabla_simple ORDER BY id</code></pre></section>
+<section class="cell explanation"><p>Esperamos tres filas. Si repetimos la inserción sin recrear la tabla, añadimos otras tres. Para reiniciar este ejemplo ejecutamos primero CREATE OR REPLACE y después un único INSERT.</p><h3>2.6 · Ruta y funciones de PySpark</h3><p>Agregamos una celda Python. La ruta corresponde al volumen que acabamos de comprobar. F es el alias con el que llamaremos las funciones de PySpark.</p></section>
+<section class="cell code-cell"><div class="cell-label">Celda 13 · Python</div><pre><code>from pyspark.sql import functions as F
+
+ruta = &quot;/Volumes/analitica/data/landing&quot;</code></pre></section>
+<section class="cell explanation"><h3>2.7 · Lectura de inmuebles</h3><p>Leemos data_demo.csv. Cada fila describe un inmueble del ejemplo. header usa la primera línea como nombres de columna e inferSchema estima los tipos a partir del contenido. Después revisamos lo que Spark infirió.</p></section>
+<section class="cell code-cell"><div class="cell-label">Celda 14 · Python</div><pre><code>df_inmuebles = spark.read.csv(
+    ruta + &quot;/data_demo.csv&quot;, header=True, inferSchema=True
+)
+
+display(df_inmuebles.limit(10))</code></pre></section>
+<section class="cell code-cell"><div class="cell-label">Celda 15 · Python</div><pre><code>df_inmuebles.printSchema()
+print(&quot;Inmuebles:&quot;, df_inmuebles.count())</code></pre></section>
+<section class="cell explanation"><p>El archivo contiene 8.969 registros. rooms representa habitaciones, garages garajes, useful_area área útil y value el valor. El CSV no declara la moneda ni la unidad de área. No asignaremos esas unidades ni haremos conversiones. Las demás columnas son interior_quality, time_on_market y has_outlier.</p><h3>2.8 · Guardar el DataFrame como tabla</h3><p>La lectura anterior crea un DataFrame. Ahora lo guardamos como tabla Delta administrada y lo consultamos por su nombre. overwrite permite reiniciar este ejemplo sin acumular copias.</p></section>
+<section class="cell code-cell"><div class="cell-label">Celda 16 · Python</div><pre><code>df_inmuebles.write.format(&quot;delta&quot;).mode(&quot;overwrite&quot;).saveAsTable(&quot;inmuebles&quot;)</code></pre></section>
+<section class="cell code-cell"><div class="cell-label">Celda 17 · SQL</div><pre><code>SELECT rooms, garages, useful_area, value FROM inmuebles LIMIT 10</code></pre></section>
+<section class="cell explanation"><p>En Catalog abrimos analitica y data, actualizamos el listado y comprobamos tabla_simple e inmuebles. Sus datos se consultan desde tablas; los CSV siguen en landing.</p><h3>2.9 · Nutrientes y tipos de datos</h3><p>Leemos nutrients_csvfile.csv como texto para conservar los valores originales. Algunos campos que parecen numéricos contienen letras, separadores o valores ausentes. En este ejemplo observamos ese comportamiento antes de decidir reglas de limpieza.</p></section>
+<section class="cell code-cell"><div class="cell-label">Celda 18 · Python</div><pre><code>df_nutrientes = spark.read.csv(
+    ruta + &quot;/nutrients_csvfile.csv&quot;, header=True, inferSchema=False
+)
+
+display(df_nutrientes.select(&quot;Food&quot;, &quot;Calories&quot;, &quot;Fat&quot;, &quot;Category&quot;).limit(10))</code></pre></section>
+<section class="cell code-cell"><div class="cell-label">Celda 19 · Python</div><pre><code>df_nutrientes.printSchema()
+print(&quot;Alimentos:&quot;, df_nutrientes.count())</code></pre></section>
+<section class="cell code-cell"><div class="cell-label">Celda 20 · SQL</div><pre><code>SHOW TABLES IN analitica.data</code></pre></section>
+<section class="cell explanation"><h3>Comprobación de archivos y tablas</h3><p>Tenemos los cinco archivos en landing, tabla_simple con tres filas e inmuebles con 8.969. El DataFrame de nutrientes contiene 335 filas y columnas de texto. Los otros tres CSV se utilizarán en el apartado 3.</p><table><thead><tr><th>Si ocurre esto</th><th>Qué revisamos</th></tr></thead><tbody><tr><td>No encuentra el archivo</td><td>En Catalog comprobar el nombre y que esté en la raíz de landing. Ejecutar de nuevo la celda ruta y después la lectura.</td></tr><tr><td>No tiene acceso al volumen</td><td>Revisar USE CATALOG en analitica, USE SCHEMA en analitica.data y READ VOLUME sobre landing.</td></tr><tr><td>No reconoce ruta o un DataFrame</td><td>La sesión puede haberse reiniciado. Ejecutar selección de catálogo y esquema, funciones, ruta y las lecturas en orden.</td></tr><tr><td>La tabla pequeña tiene más de tres filas</td><td>Repetir su creación y ejecutar INSERT una sola vez.</td></tr></tbody></table></section>
+<section id="spark-delta" class="cell explanation"><h2>3 · Spark y operaciones Delta</h2><p>Primero usaremos diez pedidos para ver las transformaciones con claridad. Después trabajaremos las operaciones de tabla con ventas_2025.csv. Son ejercicios independientes.</p><h3>3.1 · Lectura de pedidos</h3><p>Una fila de spark_intro.csv representa un pedido del ejemplo. El archivo contiene diez filas de enero de 2024 y no declara moneda. Usamos tipos explícitos para que el esquema sea fácil de revisar.</p></section>
+<section class="cell code-cell"><div class="cell-label">Celda 21 · Python</div><pre><code>df_pedidos = spark.read.csv(
+    ruta + &quot;/spark_intro.csv&quot;, header=True,
+    schema=&quot;&quot;&quot;order_id INT, order_date DATE, country STRING, product STRING,
+              category STRING, units_sold INT, unit_price DOUBLE&quot;&quot;&quot;,
+    dateFormat=&quot;yyyy-MM-dd&quot;, mode=&quot;FAILFAST&quot;
+)
+
+display(df_pedidos)</code></pre></section>
+<section class="cell explanation"><h3>3.2 · Selección y filtro</h3><p>Elegimos columnas y conservamos los pedidos de Spain. El filtro devuelve las filas que cumplen la condición y deja intacto el DataFrame original.</p></section>
+<section class="cell code-cell"><div class="cell-label">Celda 22 · Python</div><pre><code>display(
+    df_pedidos.select(&quot;order_id&quot;, &quot;country&quot;, &quot;product&quot;, &quot;units_sold&quot;)
+    .filter(F.col(&quot;country&quot;) == &quot;Spain&quot;)
+)</code></pre></section>
+<section class="cell explanation"><h3>3.3 · Columna calculada</h3><p>Para este ejercicio interpretamos unit_price como precio por unidad. El importe de cada pedido es units_sold por unit_price.</p></section>
+<section class="cell code-cell"><div class="cell-label">Celda 23 · Python</div><pre><code>df_importes = df_pedidos.withColumn(
+    &quot;importe&quot;, F.col(&quot;units_sold&quot;) * F.col(&quot;unit_price&quot;)
+)
+
+display(df_importes)</code></pre></section>
+<section class="cell explanation"><h3>3.4 · Agrupación</h3><p>Agrupamos por país para sumar unidades e importes. Cada fila del resultado corresponde a un país.</p></section>
+<section class="cell code-cell"><div class="cell-label">Celda 24 · Python</div><pre><code>resumen_pais = df_importes.groupBy(&quot;country&quot;).agg(
+    F.sum(&quot;units_sold&quot;).alias(&quot;unidades&quot;),
+    F.round(F.sum(&quot;importe&quot;), 2).alias(&quot;importe_total&quot;)
+)
+
+display(resumen_pais.orderBy(F.desc(&quot;importe_total&quot;)))</code></pre></section>
+<section class="cell explanation"><h3>3.5 · Lectura de la dimensión de productos</h3><p>dim_spark_intro.csv contiene cuatro productos, su familia y su proveedor. La llave de la dimensión es product.</p></section>
+<section class="cell code-cell"><div class="cell-label">Celda 25 · Python</div><pre><code>df_productos = spark.read.csv(
+    ruta + &quot;/dim_spark_intro.csv&quot;, header=True,
+    schema=&quot;product STRING, product_family STRING, supplier STRING&quot;,
+    mode=&quot;FAILFAST&quot;
+)
+
+display(df_productos)</code></pre></section>
+<section class="cell explanation"><h3>3.6 · Unión sencilla y comprobación</h3><p>Primero revisamos que la dimensión tenga una fila por producto. Después hacemos una unión izquierda. Esperamos conservar los diez pedidos y no encontrar productos sin correspondencia.</p></section>
+<section class="cell code-cell"><div class="cell-label">Celda 26 · Python</div><pre><code>display(df_productos.groupBy(&quot;product&quot;).count().filter(&quot;count &gt; 1&quot;))
+
+df_enriquecido = df_importes.join(df_productos, &quot;product&quot;, &quot;left&quot;)
+
+display(df_enriquecido)
+print(&quot;Pedidos antes:&quot;, df_pedidos.count())
+print(&quot;Pedidos después:&quot;, df_enriquecido.count())
+display(df_pedidos.join(df_productos, &quot;product&quot;, &quot;left_anti&quot;))
+
+assert df_enriquecido.count() == df_pedidos.count(), &quot;Revisar la llave de productos.&quot;</code></pre></section>
+<section class="cell explanation"><h3>3.7 · Guardar y volver a consultar</h3><p>Guardamos este resultado como tabla Delta. La tabla persistente puede consultarse por nombre desde otro notebook con los permisos necesarios.</p></section>
+<section class="cell code-cell"><div class="cell-label">Celda 27 · Python</div><pre><code>df_enriquecido.write.format(&quot;delta&quot;).mode(&quot;overwrite&quot;).saveAsTable(&quot;pedidos_enriquecidos&quot;)</code></pre></section>
+<section class="cell code-cell"><div class="cell-label">Celda 28 · SQL</div><pre><code>SELECT product, product_family, supplier, importe FROM pedidos_enriquecidos ORDER BY order_id</code></pre></section>
+<section class="cell explanation"><h3>3.8 · Lectura del ejemplo de ventas</h3><p>Ahora usamos ventas_2025.csv, que contiene cien filas. Para el ejercicio, cantidad representa unidades y precio el precio unitario. El archivo no declara moneda. Cada id identifica un registro de venta.</p></section>
+<section class="cell code-cell"><div class="cell-label">Celda 29 · Python</div><pre><code>df_ventas = spark.read.csv(
+    ruta + &quot;/ventas_2025.csv&quot;, header=True,
+    schema=&quot;id INT, fecha DATE, producto STRING, cantidad INT, precio DOUBLE&quot;,
+    dateFormat=&quot;yyyy-MM-dd&quot;, mode=&quot;FAILFAST&quot;
+)
+
+display(df_ventas.limit(10))
+df_ventas.printSchema()
+print(&quot;Registros de venta:&quot;, df_ventas.count())</code></pre></section>
+<section class="cell explanation"><h3>3.9 · Revisión básica antes de guardar</h3><p>Buscamos llaves repetidas, nulos y valores no válidos para las operaciones del ejercicio. No esperamos filas en estas dos salidas. Si aparecen, revisamos el archivo antes de continuar.</p></section>
+<section class="cell code-cell"><div class="cell-label">Celda 30 · Python</div><pre><code>display(df_ventas.groupBy(&quot;id&quot;).count().filter(&quot;count &gt; 1&quot;))
+
+df_invalidos = df_ventas.filter(
+    F.col(&quot;id&quot;).isNull() | F.col(&quot;fecha&quot;).isNull() |
+    F.col(&quot;producto&quot;).isNull() | F.col(&quot;cantidad&quot;).isNull() |
+    F.col(&quot;precio&quot;).isNull() | F.isnan(&quot;precio&quot;) |
+    (F.col(&quot;cantidad&quot;) &lt;= 0) | (F.col(&quot;precio&quot;) &lt; 0)
+)
+display(df_invalidos)
+assert df_invalidos.count() == 0, &quot;Revisar los registros antes de continuar.&quot;</code></pre></section>
+<section class="cell explanation"><h3>3.10 · Tabla Delta de ventas</h3><p>Guardamos la tabla base. En las siguientes operaciones modificaremos una copia de ensayo. La tabla ventas conservará los cien registros del CSV.</p></section>
+<section class="cell code-cell"><div class="cell-label">Celda 31 · Python</div><pre><code>df_ventas.write.format(&quot;delta&quot;).mode(&quot;overwrite&quot;).saveAsTable(&quot;ventas&quot;)</code></pre></section>
+<section class="cell code-cell"><div class="cell-label">Celda 32 · SQL</div><pre><code>DESCRIBE DETAIL ventas</code></pre></section>
+<section class="cell explanation"><p>En el resultado de DESCRIBE DETAIL comprobamos que format es delta. En Catalog, abrimos analitica y data y revisamos ventas y pedidos_enriquecidos.</p><h3>3.11 · Consulta del importe por producto</h3><p>La consulta multiplica cantidad por precio y suma esos importes por producto. ROUND se aplica al total para mostrar dos decimales.</p></section>
+<section class="cell code-cell"><div class="cell-label">Celda 33 · SQL</div><pre><code>SELECT producto,
+       SUM(cantidad) AS unidades,
+       ROUND(SUM(cantidad * precio), 2) AS importe_total
+FROM ventas
+GROUP BY producto
+ORDER BY importe_total DESC</code></pre></section>
+<section class="cell explanation"><h3>3.12 · Visualización</h3><ol><li>Ejecutar la consulta anterior y esperar la tabla de resultados.</li><li>Encima de la salida, pulsar <strong>+</strong> y elegir <strong>Visualization</strong>.</li><li>En Visualization Type elegir <strong>Bar</strong>.</li><li>Seleccionar producto en el eje horizontal e importe_total en el vertical.</li><li>Revisar la vista previa y pulsar <strong>Save</strong>.</li><li>Hacer clic en el nombre de la pestaña y escribir <strong>Importe por producto · muestra de ventas 2025</strong>.</li><li>Alternar entre tabla y gráfico para comprobar que los valores coinciden.</li></ol><p>No añadimos símbolo de moneda porque el archivo no la declara.</p><p><a href="https://docs.databricks.com/aws/en/visualizations" target="_blank" rel="noopener">Consulta: visualizaciones</a></p></section>
+<section class="cell explanation"><h3>3.13 · Una variable para cambiar el filtro</h3><p>Volvemos a los pedidos de Spark. Cambiamos pais_elegido por Spain, France o Germany y ejecutamos de nuevo la celda. El filtro no modifica la tabla guardada.</p></section>
+<section class="cell code-cell"><div class="cell-label">Celda 34 · Python</div><pre><code>pais_elegido = &quot;Spain&quot;
+
+display(df_enriquecido.filter(F.col(&quot;country&quot;) == pais_elegido))</code></pre></section>
+<section class="cell explanation"><h3>3.14 · Copia de ensayo para Delta</h3><p>La tabla ventas_delta_demo es independiente de ventas. CREATE OR REPLACE permite reiniciar sus datos con los cien registros originales antes de repetir la secuencia.</p></section>
+<section class="cell code-cell"><div class="cell-label">Celda 35 · SQL</div><pre><code>CREATE OR REPLACE TABLE ventas_delta_demo USING DELTA AS SELECT * FROM ventas</code></pre></section>
+<section class="cell explanation"><h3>3.15 · Versión de referencia</h3><p>Guardamos la versión actual antes de modificar filas. Al repetir el ejercicio puede tener un número diferente.</p></section>
+<section class="cell code-cell"><div class="cell-label">Celda 36 · Python</div><pre><code>historial = spark.sql(&quot;DESCRIBE HISTORY ventas_delta_demo&quot;)
+version_inicial = historial.orderBy(F.desc(&quot;version&quot;)).first()[&quot;version&quot;]
+
+print(&quot;Versión de referencia:&quot;, version_inicial)</code></pre></section>
+<section class="cell explanation"><h3>3.16 · UPDATE</h3><p>Aumentamos una unidad el precio del registro id = 1 en la copia de ensayo. Su precio original es 25,99 y después de este cambio será 26,99.</p></section>
+<section class="cell code-cell"><div class="cell-label">Celda 37 · SQL</div><pre><code>UPDATE ventas_delta_demo SET precio = ROUND(precio + 1, 2) WHERE id = 1</code></pre></section>
+<section class="cell code-cell"><div class="cell-label">Celda 38 · SQL</div><pre><code>SELECT * FROM ventas_delta_demo WHERE id = 1</code></pre></section>
+<section class="cell explanation"><h3>3.17 · INSERT</h3><p>Insertamos una venta ficticia con id = 1001. La tabla pasa de cien a ciento una filas. Ejecutamos la inserción una sola vez dentro de esta secuencia.</p></section>
+<section class="cell code-cell"><div class="cell-label">Celda 39 · SQL</div><pre><code>INSERT INTO ventas_delta_demo VALUES (1001, DATE &#x27;2025-01-31&#x27;, &#x27;Producto demo&#x27;, 2, 10.0)</code></pre></section>
+<section class="cell code-cell"><div class="cell-label">Celda 40 · SQL</div><pre><code>SELECT COUNT(*) AS registros FROM ventas_delta_demo</code></pre></section>
+<section class="cell explanation"><h3>3.18 · DELETE</h3><p>Eliminamos únicamente la venta ficticia. La tabla vuelve a tener cien filas.</p></section>
+<section class="cell code-cell"><div class="cell-label">Celda 41 · SQL</div><pre><code>DELETE FROM ventas_delta_demo WHERE id = 1001</code></pre></section>
+<section class="cell code-cell"><div class="cell-label">Celda 42 · SQL</div><pre><code>SELECT COUNT(*) AS registros FROM ventas_delta_demo</code></pre></section>
+<section class="cell explanation"><h3>3.19 · Fuente de cambios para MERGE</h3><p>La vista temporal contiene dos filas: id = 1 ya existe y llegará con precio 27,99. id = 1001 es nuevo. La fuente utiliza los mismos nombres de columna que el destino.</p></section>
+<section class="cell code-cell"><div class="cell-label">Celda 43 · SQL</div><pre><code>CREATE OR REPLACE TEMP VIEW cambios_ventas AS
+SELECT * FROM VALUES
+  (1, DATE &#x27;2025-01-03&#x27;, &#x27;Teclado&#x27;, 20, CAST(27.99 AS DOUBLE)),
+  (1001, DATE &#x27;2025-01-31&#x27;, &#x27;Producto demo&#x27;, 2, CAST(10.0 AS DOUBLE))
+AS cambios(id, fecha, producto, cantidad, precio)</code></pre></section>
+<section class="cell code-cell"><div class="cell-label">Celda 44 · SQL</div><pre><code>SELECT * FROM cambios_ventas</code></pre></section>
+<section class="cell explanation"><h3>3.20 · MERGE</h3><p>Comparamos por id. Si la llave existe, actualizamos la fila. Si no existe, la insertamos. La fuente debe tener una sola fila por llave.</p></section>
+<section class="cell code-cell"><div class="cell-label">Celda 45 · SQL</div><pre><code>MERGE INTO ventas_delta_demo AS destino
+USING cambios_ventas AS fuente
+ON destino.id = fuente.id
+WHEN MATCHED THEN UPDATE SET *
+WHEN NOT MATCHED THEN INSERT *</code></pre></section>
+<section class="cell code-cell"><div class="cell-label">Celda 46 · SQL</div><pre><code>SELECT * FROM ventas_delta_demo WHERE id IN (1, 1001) ORDER BY id</code></pre></section>
+<section class="cell explanation"><h3>3.21 · Historial</h3><p>Revisamos las operaciones y las versiones que produjeron.</p></section>
+<section class="cell code-cell"><div class="cell-label">Celda 47 · SQL</div><pre><code>DESCRIBE HISTORY ventas_delta_demo</code></pre></section>
+<section class="cell explanation"><h3>3.22 · Time Travel</h3><p>Leemos la versión registrada antes de los cambios y la comparamos con la actual. La versión de referencia tiene cien filas y precio 25,99 para id = 1. La actual tiene ciento una filas y precio 27,99. La lectura histórica necesita conservar los archivos y el registro de esa versión.</p></section>
+<section class="cell code-cell"><div class="cell-label">Celda 48 · Python</div><pre><code>df_inicial = spark.read.option(&quot;versionAsOf&quot;, version_inicial).table(&quot;ventas_delta_demo&quot;)
+
+print(&quot;Filas iniciales:&quot;, df_inicial.count())
+print(&quot;Filas actuales:&quot;, spark.table(&quot;ventas_delta_demo&quot;).count())
+display(df_inicial.filter(F.col(&quot;id&quot;) == 1))
+display(spark.table(&quot;ventas_delta_demo&quot;).filter(F.col(&quot;id&quot;) == 1))</code></pre></section>
+<section class="cell explanation"><h3>Comprobación de Spark y Delta</h3><p>Tenemos diez pedidos enriquecidos, cien ventas base y ciento una filas en la copia Delta. Podemos explicar el efecto de cada operación y consultar la versión de referencia.</p></section>
+<section class="cell code-cell"><div class="cell-label">Celda 49 · SQL</div><pre><code>SELECT &#x27;Pedidos enriquecidos&#x27; AS tabla, COUNT(*) AS registros FROM pedidos_enriquecidos
+UNION ALL
+SELECT &#x27;Ventas base&#x27;, COUNT(*) FROM ventas
+UNION ALL
+SELECT &#x27;Ensayo Delta&#x27;, COUNT(*) FROM ventas_delta_demo</code></pre></section>
+<section id="vistas-permisos" class="cell explanation"><h2>4 · Vistas, funciones y permisos</h2><p>Trabajamos sobre ventas, que conserva el CSV original, para publicar una consulta reutilizable. La copia de ensayo permanece separada.</p><h3>4.1 · Creación de una vista</h3><p>La vista guarda la consulta. Al consultarla obtenemos el resumen calculado desde su tabla base.</p></section>
+<section class="cell code-cell"><div class="cell-label">Celda 50 · SQL</div><pre><code>CREATE OR REPLACE VIEW v_ventas_por_producto AS
+SELECT producto,
+       SUM(cantidad) AS unidades,
+       ROUND(SUM(cantidad * precio), 2) AS importe_total
+FROM ventas
+GROUP BY producto</code></pre></section>
+<section class="cell code-cell"><div class="cell-label">Celda 51 · SQL</div><pre><code>SELECT * FROM v_ventas_por_producto ORDER BY importe_total DESC</code></pre></section>
+<section class="cell explanation"><h3>4.2 · Función reutilizable</h3><p>Definimos una regla de demostración: un importe supera el umbral si es mayor que 500. El umbral no es una clasificación oficial del negocio. Un valor ausente produce NULL en esta comparación.</p></section>
+<section class="cell code-cell"><div class="cell-label">Celda 52 · SQL</div><pre><code>CREATE OR REPLACE FUNCTION es_venta_alta(importe DOUBLE)
+RETURNS BOOLEAN
+RETURN importe &gt; 500</code></pre></section>
+<section class="cell code-cell"><div class="cell-label">Celda 53 · SQL</div><pre><code>SELECT id, producto, cantidad, precio,
+       es_venta_alta(cantidad * precio) AS supera_umbral
+FROM ventas
+ORDER BY id
+LIMIT 10</code></pre></section>
+<section class="cell explanation"><h3>4.3 · Propiedad y permisos</h3><p>Revisamos el propietario de la vista y las concesiones que nuestro usuario puede ver. Estos resultados describen el entorno en el que ejecutamos la práctica.</p></section>
+<section class="cell code-cell"><div class="cell-label">Celda 54 · SQL</div><pre><code>DESCRIBE TABLE EXTENDED v_ventas_por_producto</code></pre></section>
+<section class="cell code-cell"><div class="cell-label">Celda 55 · SQL</div><pre><code>SHOW GRANTS ON VIEW v_ventas_por_producto</code></pre></section>
+<section class="cell explanation"><h3>4.4 · Concesión de acceso</h3><p>El ejemplo utiliza lectores_clase. Antes de habilitarlo, el administrador debe crear el grupo y agregar a la persona que hará la prueba. Si el grupo tiene otro nombre, lo reemplazamos. Quitamos los dos guiones de cada concesión solo cuando corresponda aplicarla y tengamos permiso para hacerlo. Si solo estamos revisando la sintaxis, las dejamos comentadas.</p></section>
+<section class="cell code-cell"><div class="cell-label">Celda 56 · SQL</div><pre><code>-- GRANT USE CATALOG ON CATALOG analitica TO `lectores_clase`;
+-- GRANT USE SCHEMA ON SCHEMA analitica.data TO `lectores_clase`;
+-- GRANT SELECT ON VIEW analitica.data.v_ventas_por_producto TO `lectores_clase`;
+
+SHOW GRANTS ON VIEW v_ventas_por_producto;</code></pre></section>
+<section class="cell explanation"><h3>4.5 · Prueba con otra identidad</h3><ol><li>Una persona del grupo inicia sesión con su propia cuenta.</li><li>Crea o abre un notebook desde Workspace y selecciona cómputo como en el apartado 1.</li><li>Agrega una celda SQL y ejecuta la consulta siguiente.</li><li>Revisa si obtiene el resumen. Una consulta ejecutada por el propietario comprueba su propio acceso.</li></ol></section>
+<section class="cell code-cell"><div class="cell-label">Celda 57 · SQL</div><pre><code>SELECT * FROM analitica.data.v_ventas_por_producto</code></pre></section>
+<section class="cell explanation"><h3>4.6 · Revisión del linaje</h3><ol><li>Ejecutar la consulta de la vista.</li><li>Abrir <strong>Catalog</strong>, después analitica y data.</li><li>Seleccionar <strong>v_ventas_por_producto</strong> y abrir la pestaña <strong>Lineage</strong>.</li><li>Si aparece <strong>See Lineage Graph</strong>, abrir el gráfico.</li><li>Buscar la dependencia con ventas. La información visible depende de los permisos y de las operaciones capturadas por el entorno.</li></ol><p>Si falla el acceso, revisamos el grupo y USE CATALOG, USE SCHEMA y SELECT. Un usuario puede recibir acceso por otras pertenencias o por herencia.</p><p><a href="https://docs.databricks.com/aws/en/data-governance/unity-catalog/data-lineage" target="_blank" rel="noopener">Consulta: linaje</a></p></section>
+<section class="cell explanation"><h3>Comprobación de vistas y permisos</h3><p>Podemos distinguir archivo, DataFrame, tabla, vista y función. Identificamos la tabla base de la vista, el responsable del objeto y los permisos necesarios para consultarla.</p></section>
+<section class="cell explanation"><h3>Documentación de consulta</h3><ul><li><a href="https://docs.databricks.com/aws/en/notebooks/notebooks-manage">Creación de notebooks</a></li><li><a href="https://docs.databricks.com/aws/en/volumes/">Volúmenes de Unity Catalog</a></li><li><a href="https://docs.databricks.com/aws/en/tables/history">Historial y versiones de tablas</a></li><li><a href="https://docs.databricks.com/aws/en/data-governance/unity-catalog/manage-privileges/">Administración de privilegios</a></li></ul></section></main></body></html>
